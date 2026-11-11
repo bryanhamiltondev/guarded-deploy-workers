@@ -43,8 +43,11 @@ $worker->apply(__DIR__ . '/index.html', $backup, $src, array(
 $worker->done(__FILE__, $backup, 'OK: banner hidden');
 ```
 
-Upload `GuardedWorker.php` + your worker, hit the URL once, done. A full worked
-example is in [examples/hide-element.example.php](examples/hide-element.example.php).
+Upload `GuardedWorker.php` + your worker, hit the URL once, done. Worked examples:
+
+- [examples/hide-element.example.php](examples/hide-element.example.php) - the basic guarded patch
+- [examples/style-block.example.php](examples/style-block.example.php) - replacing an inline `<style>` block without byte needles across it
+- [examples/one-shot-hint.example.php](examples/one-shot-hint.example.php) - self-contained one-shot UI hint after a closed IIFE
 
 ## The checklist
 
@@ -52,6 +55,11 @@ example is in [examples/hide-element.example.php](examples/hide-element.example.
 hard way: probe before patching, byte-exact needles, delta-based balance checks,
 cache-busting live verification, three-layer backslash escaping, and why stale
 opcache is the default explanation for "the patch didn't work".
+
+[docs/recipes.md](docs/recipes.md) goes deeper on the four patterns that earn
+their own page: marker-to-close splicing, the version-bump pass for versioned
+assets, the mock-render gate (php -l is not a render test), and self-contained
+appended scripts.
 
 ## When to use this
 
