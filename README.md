@@ -46,6 +46,7 @@ $worker->done(__FILE__, $backup, 'OK: banner hidden');
 Upload `GuardedWorker.php` + your worker, hit the URL once, done. Worked examples:
 
 - [examples/hide-element.example.php](examples/hide-element.example.php) - the basic guarded patch
+- [examples/version-fingerprint.example.php](examples/version-fingerprint.example.php) - DRY-by-default gate with a build fingerprint on every response, so stale opcache/CDN copies get detected, not guessed at
 - [examples/style-block.example.php](examples/style-block.example.php) - replacing an inline `<style>` block without byte needles across it
 - [examples/one-shot-hint.example.php](examples/one-shot-hint.example.php) - self-contained one-shot UI hint after a closed IIFE
 
@@ -60,6 +61,10 @@ opcache is the default explanation for "the patch didn't work".
 their own page: marker-to-close splicing, the version-bump pass for versioned
 assets, the mock-render gate (php -l is not a render test), and self-contained
 appended scripts.
+
+[docs/selftest.md](docs/selftest.md) is rule 19: a DRY run cannot prove its own
+failure paths, so every worker ships with a fixture self-test that asserts the
+abort paths actually fire.
 
 ## When to use this
 
