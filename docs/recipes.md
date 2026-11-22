@@ -44,3 +44,37 @@ If the page's main script is one big IIFE, injected code that reaches into it
 fails silently - the closure closed lines ago. Every appended block must own its
 querySelectors, listeners, and cleanup. See
 [examples/one-shot-hint.example.php](../examples/one-shot-hint.example.php).
+
+## 5. The runtime recount masks static fallbacks
+
+A value your page recounts at runtime (fetch -> JS -> paint) still ships with
+static fallbacks: the no-JS first paint, the count-up's `data-to`, tooltips,
+`aria-label`s. When the truth changes on the server, the runtime block updates
+itself on the next load - and silently MASKS the stale statics. The drift is
+invisible in the browser and obvious only in the raw HTML, which is what
+crawlers and screen readers get first.
+
+Real deploy: a medal strip whose live proxy said 1 gold / 9 silver / 44 bronze
+while the HTML painted 43 bronze, 8 silver, and an aria-label two revisions
+older - three stale surfaces on one element, invisible until read raw.
+
+The rule: **when a deploy changes a value the runtime recounts, sync every
+static surface of that element in the SAME worker** - and sweep every file that
+carries the markup, not just the page you're looking at. See
+[examples/static-fallback-sync.example.php](../examples/static-fallback-sync.example.php).
+
+## 6. The dead guard: referenced is not assigned
+
+A cross-file hook only works if someone ASSIGNS it. A page can reference
+`window.stopPreview(...)` from dawn to dusk - if no engine ever does
+`window.stopPreview = function ...`, the guard is dead code and the fallback
+branch always runs.
+
+Real deploy: two audio engines, each unaware of the other. One referenced a
+window-level stopper that was never assigned anywhere, so its cross-engine
+safety branch silently never fired - and two tracks played over each other.
+
+The rule: **before trusting a `window.*` contract, grep for the ASSIGNMENT,
+not the reference** - and expose stoppers from INSIDE the owning engine's own
+stop function, so they always see that engine's current state. See
+[examples/audio-singleton.example.php](../examples/audio-singleton.example.php).
