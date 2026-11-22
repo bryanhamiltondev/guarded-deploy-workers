@@ -4,6 +4,13 @@ All notable changes to guarded-deploy-workers.
 
 ## Unreleased
 
+- **Added:** `examples/version-fingerprint.example.php` - DRY-by-default
+  gate with a build fingerprint on every response; stale opcache/CDN
+  copies get detected, not guessed at, and a stale copy that will not die
+  is beaten by a new filename plus a new token
+- **Added:** `docs/selftest.md` - the fixture self-test rule: a DRY run
+  cannot prove its own failure paths, so every worker ships with
+  assertions that its abort paths actually fire
 - **Added:** `docs/recipes.md` - four production-extracted patterns:
   marker-to-close splicing for inline blocks, the version-bump pass for
   versioned assets, the mock-render gate (php -l is not a render test), and
