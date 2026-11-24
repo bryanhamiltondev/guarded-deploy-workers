@@ -25,3 +25,33 @@ the bytes say what the page is.
 A worker gate token containing `!` kept rejecting re-runs on one host while
 the identical code with an alphanumeric token ran clean. Default to
 punctuation-free alphanumeric tokens (`bhClnum5x51`), never `bh-clnum!5`.
+
+## Rule 22: GO behind POST, token in body, no-store always
+
+The original worker pattern took the gate token as a GET parameter, which
+made every execution URL a link: cacheable by shared caches, fetchable by
+link-preview bots, and one accidental paste away from being triggered by
+something that only wanted an og:image. A replayed DRY run is harmless. A
+replayed GO run is a second patch.
+
+The fix is three lines at the top of every worker:
+
+```php
+header('Cache-Control: no-store');          // nothing stores this response
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405); exit('POST required');   // GET = dry info only
+}
+$token = $_POST['token'] ?? '';             // token moves out of the URL
+```
+
+Notes from production:
+
+- Self-deleting workers blunt the replay risk after success (the file is
+gone), but the live window is real: a bot firing the GO URL between "file
+exists" and "self-delete" gets a second patch attempt. Exact-1 needle guards
+will abort it loudly - safe, but noisy. Guards doing their job by accident
+is not a security design.
+- DRY runs may stay GET (they change nothing); GO must be POST.
+- CLI/cron keepers read the token from argv or an env var instead.
+- Cache-busting query params become a backup for the VERIFY step, not the
+mechanism that keeps a deploy from double-firing.
